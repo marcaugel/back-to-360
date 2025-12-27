@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Back to 360 - Fix & Share</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/exifreader@4.12.0/dist/exif-reader.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode.js/qrcode.min.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; text-align: center; background: #f0f4f8; padding: 20px; color: #333; margin: 0; }
+        .card { max-width: 480px; margin: 10px auto; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+        h1 { color: #2c3e50; margin-bottom: 5px; font-size: 28px; }
+        .subtitle { color: #7f8c8d; margin-bottom: 20px; font-size: 14px; }
+        
+        .drop-zone { border: 3px dashed #3498db; padding: 35px; border-radius: 18px; cursor: pointer; margin: 15px 0; background: #fcfdfe; transition: 0.3s; }
+        .drop-zone:hover { background: #eef7fe; border-color: #2980b9; }
+        
+        #stato { margin: 15px 0; font-weight: bold; padding: 12px; border-radius: 10px; background: #f8f9fa; min-height: 20px; }
+        
+        .btn { background: #27ae60; color: white; border: none; padding: 16px; border-radius: 12px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 10px; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-share { background: #3498db; }
+        .btn-receive { background: #8e44ad; }
+        
+        #downloadArea, #p2pArea { display: none; margin-top: 20px; padding: 20px; border-radius: 18px; border: 1px solid #e1e8ed; background: #fff; }
+        
+        #qrcode { background: white; padding: 15px; display: inline-block; margin: 15px auto; border-radius: 10px; }
+        .code-display { font-size: 22px; letter-spacing: 2px; color: #2980b9; margin: 10px 0; font-family: monospace; font-weight: bold; }
+        
+        input[type="text"] { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 10px; text-align: center; font-size: 16px; box-sizing: border-box; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 25px 0; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>Back to 360</h1>
+    <p class="subtitle">Ripristina metadati e scambia foto senza perdite</p>
+    
+    <div class="drop-zone" onclick="document.getElementById('inputFoto').click()">
+        <span id="label">Tocca per scegliere la foto panoramica</span>
+        <input type="file" id="inputFoto" accept="image/jpeg" style="display:none">
+    </div>
+
+    <div id="stato">In attesa del file...</div>
+    
+    <button id="btnRipara" class="btn" style="display:none" onclick="processaFoto()">🪄 Ripara e attiva 360</button>
+
+    <div id="downloadArea">
+        <p style="color: #27ae60; font-weight: bold;">✨ Foto riparata con successo!</p>
+        <a id="linkDownload" href="#" class="btn" style="display:block; text-decoration:none; line-height:20px; box-sizing:border-box;">💾 Salva in Galleria</a>
+        <button class="btn btn-share" onclick="mostraP2P()">📱 Invia via QR / P2P</button>
+    </div>
+
+    <div id="p2pArea">
+        <hr>
+        <h3>Invia a un amico</h3>
+        <p>Fagli inquadrare questo QR per ricevere la foto:</p>
+        <div id="qrcode"></div>
+        <div id="mioIDDisplay" class="code-display">---</div>
+        
+        <hr>
+        <h3>Ricevi da un amico</h3>
+        <p>Inserisci il codice se non usi il QR:</p>
+        <input type="text" id="inputCodiceAmico" placeholder="Codice amico">
+        <button class="btn btn-receive" onclick="connettiERicevi()">Connetti e Ricevi</button>
+    </div>
+</div>
+
+<script>
+    let fileOriginale = null;
+    let blobRiparato = null;
+    let peer = null;
+
+    const input = document.getElementById('inputFoto');
+    const stato = document.getElementById('stato');
+    const btnRipara = document.getElementById('btnRipara');
+    const downloadArea = document.getElementById('downloadArea');
+    const p2pArea = document.getElementById('p2pArea');
+    const mioIDDisplay = document.getElementById('mioIDDisplay');
+    const qrcodeDiv = document.getElementById('qrcode');
+    const inputCodiceAmico = document.getElementById('inputCodiceAmico');
+
+    // Inizializzazione PeerJS
+    peer = new Peer();
+    peer.on('open', (id) => {
+        mioIDDisplay.innerText = id;
+        generaSuggerimentoQR(id);
+        controllaURLPerAutoConnessione(id);
+    });
+
+    // Funzione QR Code
+    function generaSuggerimentoQR(id) {
+        const urlCondivisione = window.location.origin + window.location.pathname + "#connect=" + id;
+        qrcodeDiv.innerHTML = "";
+        new QRCode(qrcodeDiv, { text: urlCondivisione, width: 180, height: 180 });
+    }
+
+    // Auto-connessione se aperto da QR
+    function controllaURLPerAutoConnessione(mioID) {
+        const hash = window.location.hash;
+        if (hash.startsWith("#connect=")) {
+            const idAmico = hash.split("=")[1];
+            if (idAmico && idAmico !== mioID) {
+                inputCodiceAmico.value = idAmico;
+                connettiERicevi();
+            }
+        }
+    }
+
+    // 1. ANALISI FILE
+    input.addEventListener('change', async (e) => {
+        fileOriginale = e.target.files[0];
+        if (!fileOriginale) return;
+        stato.innerText = "Analisi file...";
+        try {
+            const tags = await ExifReader.load(fileOriginale);
+            const is360 = tags['ProjectionType'] || tags['GPano:ProjectionType'];
+            if (is360) {
+                stato.innerText = "✅ La foto ha già i metadati 360!";
+                btnRipara.style.display = "none";
+                mostraP2P();
+            } else {
+                stato.innerText = "❌ Metadati 360 mancanti.";
+                btnRipara.style.display = "block";
+                downloadArea.style.display = "none";
+            }
+        } catch (err) { stato.innerText = "Errore: usa un file JPEG."; }
+    });
+
+    // 2. RIPARAZIONE BINARIA (Iniezione APP1 XMP)
+    function processaFoto() {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const uint8 = new Uint8Array(e.target.result);
+            const xmpStr = `http://ns.adobe.com/xap/1.0/\0<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?><x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description rdf:about="" xmlns:GPano="http://ns.google.com/photos/1.0/panorama/"><GPano:ProjectionType>equirectangular</GPano:ProjectionType><GPano:UsePanoramaViewer>True</GPano:UsePanoramaViewer><GPano:FullPanoWidthPixels>4000</GPano:FullPanoWidthPixels><GPano:FullPanoHeightPixels>2000</GPano:FullPanoHeightPixels></rdf:Description></rdf:RDF></x:xmpmeta><?xpacket end="w"?>`;
+            const xmpBytes = new TextEncoder().encode(xmpStr);
+            const xmpLen = xmpBytes.length + 2;
+            const app1 = new Uint8Array([0xFF, 0xE1, (xmpLen >> 8) & 0xFF, xmpLen & 0xFF]);
+            
+            const finale = new Uint8Array(uint8.length + app1.length + xmpBytes.length);
+            finale.set(uint8.slice(0, 2), 0);
+            finale.set(app1, 2);
+            finale.set(xmpBytes, 6);
+            finale.set(uint8.slice(2), 6 + xmpBytes.length);
+
+            blobRiparato = new Blob([finale], {type: "image/jpeg"});
+            document.getElementById('linkDownload').href = URL.createObjectURL(blobRiparato);
+            document.getElementById('linkDownload').download = "360_" + fileOriginale.name;
+            
+            stato.innerText = "✨ Riparata!";
+            btnRipara.style.display = "none";
+            downloadArea.style.display = "block";
+        };
+        reader.readAsArrayBuffer(fileOriginale);
+    }
+
+    function mostraP2P() { p2pArea.style.display = "block"; window.scrollTo(0,document.body.scrollHeight); }
+
+    // 3. LOGICA P2P
+    peer.on('connection', (conn) => {
+        conn.on('open', () => {
+            stato.innerText = "Inviando file all'amico...";
+            conn.send({ file: blobRiparato || fileOriginale, name: "360_" + fileOriginale.name });
+        });
+    });
+
+    function connettiERicevi() {
+        const id = inputCodiceAmico.value.trim();
+        if(!id) return;
+        stato.innerText = "Connessione...";
+        const conn = peer.connect(id);
+        conn.on('data', (data) => {
+            if (data.file) {
+                const url = URL.createObjectURL(new Blob([data.file]));
+                const a = document.createElement('a');
+                a.href = url; a.download = data.name; a.click();
+                stato.innerText = "🎁 Foto ricevuta!";
+            }
+        });
+        conn.on('open', () => stato.innerText = "Connesso! Ricezione...");
+    }
+</script>
+
+</body>
+</html>
