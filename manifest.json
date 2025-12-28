@@ -1,0 +1,25 @@
+{
+  "short_name": "BackTo360",
+  "name": "Back to 360 Viewer",
+  "description": "Visualizzatore di foto e contenuti a 360 gradi.",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/back-to-360/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "scope": "/back-to-360/",
+  "orientation": "any"
+}
