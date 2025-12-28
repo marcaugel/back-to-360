@@ -8,37 +8,156 @@
     <script src="https://cdn.jsdelivr.net/npm/exifreader@4.12.0/dist/exif-reader.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; text-align: center; background: #f0f4f8; padding: 20px; color: #333; margin: 0; }
-        .card { max-width: 480px; margin: 10px auto; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
-        h1 { color: #2c3e50; margin-bottom: 5px; font-size: 28px; }
-        .subtitle { color: #7f8c8d; margin-bottom: 25px; font-size: 14px; }
-        .section { background: #f8f9fa; padding: 20px; border-radius: 18px; margin-bottom: 20px; border: 1px solid #e1e8ed; }
-        h3 { margin-top: 0; color: #34495e; font-size: 18px; }
-        .drop-zone { border: 2px dashed #3498db; padding: 25px; border-radius: 15px; cursor: pointer; background: #fff; transition: 0.3s; }
-        .drop-zone:hover { background: #eef7fe; }
-        #stato { margin: 15px 0; font-weight: bold; color: #2980b9; min-height: 20px; }
-        .btn { background: #27ae60; color: white; border: none; padding: 16px; border-radius: 12px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 10px; transition: 0.2s; }
-        .btn-share { background: #3498db; }
-        .btn-receive { background: #8e44ad; }
-        #qrcode { background: white; padding: 15px; display: inline-block; margin: 15px auto; border: 1px solid #ddd; border-radius: 10px; min-width: 150px; min-height: 150px; }
-        #qrcode img { margin: 0 auto; }
-        .code-display { font-size: 18px; color: #2c3e50; font-family: monospace; font-weight: bold; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd; word-break: break-all; }
-        input[type="text"] { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 10px; text-align: center; font-size: 16px; box-sizing: border-box; }
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #27ae60;
+            --accent-color: #8e44ad;
+            --bg-color: #f0f4f8;
+            --text-color: #2c3e50;
+            --whatsapp-color: #25D366;
+        }
+
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            text-align: center; 
+            background: var(--bg-color); 
+            padding: 20px; 
+            color: var(--text-color); 
+            margin: 0; 
+        }
+
+        .card { 
+            max-width: 480px; 
+            margin: 20px auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 28px; 
+            box-shadow: 0 15px 50px rgba(0,0,0,0.1); 
+            overflow: hidden;
+        }
+
+        .logo-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .logo-container svg {
+            width: 180px; /* Ridotto leggermente per bilanciare il design */
+            height: auto;
+            max-height: 180px;
+        }
+
+        h1 { color: var(--text-color); margin: 0px 0 5px 0; font-size: 28px; }
+        .subtitle { color: #7f8c8d; margin-bottom: 25px; font-size: 15px; }
+        
+        .section { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 20px; 
+            margin-bottom: 20px; 
+            border: 1px solid #e1e8ed; 
+        }
+
+        .drop-zone { 
+            border: 2px dashed var(--primary-color); 
+            padding: 25px; 
+            border-radius: 15px; 
+            cursor: pointer; 
+            background: #fff; 
+            transition: 0.3s; 
+        }
+        .drop-zone:hover { background: #eef7fe; border-color: #2980b9; }
+
+        #stato { 
+            margin: 15px 0; 
+            font-weight: bold; 
+            color: var(--primary-color); 
+            font-size: 14px;
+        }
+
+        .btn { 
+            background: var(--secondary-color); 
+            color: white; 
+            border: none; 
+            padding: 16px; 
+            border-radius: 14px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            width: 100%; 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-share { background: var(--whatsapp-color); margin-top: 10px; }
+        .btn-receive { background: var(--accent-color); }
+        .btn-local { background: var(--primary-color); }
+
+        #qrcode { 
+            background: white; 
+            padding: 15px; 
+            display: inline-block; 
+            margin: 15px auto; 
+            border-radius: 12px; 
+            border: 1px solid #eee;
+        }
+        
+        .code-display { 
+            font-size: 18px; 
+            font-family: monospace; 
+            font-weight: bold; 
+            background: #eef6ff; 
+            padding: 12px; 
+            border-radius: 10px; 
+            word-break: break-all;
+            color: var(--primary-color);
+            border: 1px dashed var(--primary-color);
+        }
+
+        input[type="text"] { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            border: 2px solid #ddd; 
+            border-radius: 12px; 
+            text-align: center; 
+            box-sizing: border-box; 
+            font-size: 16px;
+        }
+
         .hidden { display: none; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>Back to 360</h1>
-    <p class="subtitle">Scegli cosa vuoi fare:</p>
+    <div class="logo-container">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+            <g>
+                <path d="M 357.53 305.89 C352.64,310.16 348.00,312.81 348.00,311.32 C348.00,311.06 349.63,308.85 351.62,306.42 C354.75,302.60 355.39,300.91 356.30,294.01 C356.88,289.61 357.16,285.83 356.92,285.59 C356.69,285.36 355.26,284.85 353.75,284.47 C351.31,283.86 351.00,284.06 351.00,286.26 C351.00,290.22 347.39,294.00 343.61,294.00 C340.33,294.00 335.00,289.79 335.00,287.20 C335.00,284.65 332.22,286.16 331.65,289.02 C331.04,292.06 328.05,294.00 323.97,294.00 C321.99,294.00 320.05,291.28 319.44,287.63 C318.40,281.52 317.57,279.35 315.68,277.85 C313.63,276.21 313.65,276.17 317.42,274.60 C319.53,273.72 321.86,273.00 322.62,273.00 C324.17,273.00 324.48,271.41 323.10,270.56 C322.59,270.25 322.57,268.43 323.04,266.31 C323.50,264.28 323.61,262.18 323.28,261.65 C322.96,261.12 323.21,261.01 323.85,261.40 C324.87,262.04 325.44,260.87 325.13,258.79 C324.97,257.68 331.09,253.37 335.50,251.49 C340.52,249.35 347.55,248.93 349.79,250.64 C351.37,251.84 351.35,251.94 349.50,251.98 C347.61,252.01 343.00,257.44 343.00,259.62 C343.00,260.16 344.12,262.14 345.50,264.00 C349.36,269.23 348.89,270.19 342.90,269.39 C338.29,268.78 337.83,268.89 338.15,270.57 C338.44,272.05 340.09,272.66 346.48,273.65 C355.00,274.97 356.65,274.68 353.56,272.42 C351.71,271.06 351.74,271.00 354.31,271.00 C355.98,271.00 358.47,269.67 360.90,267.47 C364.07,264.61 364.78,263.30 364.70,260.50 C364.57,255.67 365.57,255.21 369.01,258.51 C372.88,262.22 376.00,270.66 376.00,277.43 C376.00,288.78 370.30,301.00 365.00,301.00 C363.97,301.00 360.60,303.20 357.53,305.89 ZM 340.59 364.42 C340.75,365.53 340.02,366.00 338.16,365.98 C334.87,365.97 332.08,364.47 334.09,363.80 C335.03,363.49 334.62,362.50 332.71,360.44 C329.99,357.51 329.03,353.00 331.12,353.00 C331.82,353.00 331.97,352.18 331.50,350.75 C331.10,349.51 330.49,346.25 330.14,343.50 C329.58,339.13 329.22,338.51 327.24,338.58 C325.45,338.64 325.10,338.26 325.58,336.76 C326.38,334.23 325.03,322.87 324.00,323.50 C323.55,323.78 323.44,323.03 323.75,321.85 C324.18,320.19 323.99,319.88 322.91,320.50 C322.13,320.95 322.59,320.12 323.92,318.66 C326.42,315.92 328.15,314.91 326.09,317.40 C325.14,318.53 325.38,318.77 327.36,318.65 C329.42,318.52 329.65,318.21 328.80,316.63 C328.14,315.40 328.14,314.97 328.80,315.37 C329.34,315.71 330.05,315.30 330.38,314.46 C330.85,313.22 331.99,313.06 336.23,313.61 C339.13,313.99 341.73,314.58 342.00,314.92 C342.27,315.26 343.74,316.33 345.25,317.30 C348.07,319.09 348.99,321.28 346.75,320.84 C346.06,320.71 343.70,320.99 341.50,321.46 C339.30,321.94 336.71,322.22 335.75,322.10 C334.38,321.92 334.00,322.62 334.00,325.33 C334.00,327.44 334.57,329.00 335.46,329.35 C336.71,329.83 336.73,330.29 335.58,332.51 C333.98,335.59 335.15,342.40 337.77,345.30 C339.32,347.02 339.47,347.02 340.04,345.40 C340.39,344.39 341.76,343.62 343.32,343.55 C346.50,343.41 346.72,344.07 344.05,345.74 C342.37,346.79 342.24,347.39 343.14,349.98 C343.92,352.21 344.82,353.00 346.60,353.00 C347.92,353.00 349.00,353.40 349.00,353.88 C349.00,354.84 343.88,357.21 342.41,356.94 C339.32,356.35 337.89,357.13 338.19,359.25 C338.36,360.49 338.92,361.80 339.43,362.17 C339.94,362.54 340.46,363.55 340.59,364.42 ZM 369.62 364.89 C367.91,365.43 364.02,366.10 361.00,366.40 L 355.50 366.93 L 359.62 365.72 C361.89,365.05 364.48,363.88 365.37,363.13 C367.36,361.45 367.52,357.14 365.61,356.40 C363.95,355.77 364.14,346.15 365.84,345.10 C366.43,344.74 366.88,343.55 366.85,342.47 C366.75,339.24 369.11,328.60 370.21,327.25 C373.02,323.84 376.29,326.80 377.65,333.98 C377.91,335.34 378.28,336.61 378.47,336.80 C378.65,336.99 377.51,340.01 375.92,343.51 C373.71,348.40 373.00,351.51 372.89,356.90 C372.75,363.85 372.71,363.94 369.62,364.89 ZM 330.00 282.04 C330.83,282.59 332.62,282.79 334.00,282.47 C341.72,280.69 345.57,280.40 350.00,281.28 C358.45,282.95 360.95,280.10 353.46,277.32 C351.17,276.47 344.12,275.61 336.75,275.29 L 324.00 274.73 L 324.00 277.87 C324.00,280.44 324.40,281.00 326.25,281.02 C327.49,281.02 329.17,281.48 330.00,282.04 Z" fill="#2c3e50"/>
+                <path d="M 340.59 364.42 C340.46,363.55 339.94,362.54 339.43,362.17 C338.92,361.80 338.36,360.49 338.19,359.25 C337.89,357.13 339.32,356.35 342.41,356.94 C343.88,357.21 349.00,354.84 349.00,353.88 C349.00,353.40 347.92,353.00 346.60,353.00 C344.82,353.00 343.92,352.21 343.14,349.98 C342.24,347.39 342.37,346.79 344.05,345.74 C346.72,344.07 346.50,343.41 343.32,343.55 C341.76,343.62 340.39,344.39 340.04,345.40 C339.47,347.02 339.32,347.02 337.77,345.30 C335.15,342.40 333.98,335.59 335.58,332.51 C336.73,330.29 336.71,329.83 335.46,329.35 C334.98,329.16 334.59,328.62 334.33,327.82 C334.69,328.73 335.37,329.30 336.55,329.84 C337.95,330.48 339.56,331.00 340.12,331.00 C341.69,331.00 344.20,333.87 343.55,334.92 C343.23,335.44 343.43,336.15 344.00,336.50 C344.57,336.85 344.76,337.58 344.43,338.12 C344.04,338.74 343.34,338.70 342.50,338.00 C341.54,337.20 340.99,337.21 340.48,338.04 C338.25,341.64 347.78,341.54 352.40,337.90 C354.83,335.99 354.86,335.99 355.50,337.98 C356.40,340.85 360.79,340.69 361.89,337.75 C364.14,331.74 364.19,331.00 362.32,330.97 C360.10,330.93 357.00,328.70 357.00,327.14 C357.00,325.36 359.47,325.79 362.37,328.07 C367.58,332.18 364.96,342.25 357.64,346.20 C356.46,346.84 352.58,347.65 349.00,348.00 C343.15,348.58 342.75,348.75 345.00,349.76 C346.28,350.33 346.96,350.66 347.67,350.78 C348.62,350.93 349.62,350.70 352.13,350.11 C352.38,350.06 352.63,350.00 352.90,349.94 C361.61,347.93 368.72,339.85 367.65,333.21 C366.68,327.24 362.88,324.47 354.42,323.54 C352.35,323.31 352.00,323.70 352.00,326.21 C352.00,330.51 348.61,329.65 348.19,325.24 C347.88,322.07 346.54,320.89 345.79,323.13 C345.54,323.87 344.81,323.67 343.71,322.57 C343.06,321.91 342.23,321.50 341.57,321.45 C343.75,320.98 346.07,320.71 346.75,320.84 C348.99,321.28 348.07,319.09 345.25,317.30 C344.62,316.90 344.00,316.48 343.47,316.10 C344.56,316.62 346.50,316.99 348.32,316.99 C353.27,316.98 362.51,312.13 363.49,309.02 C364.25,306.63 364.35,306.62 369.50,308.47 C371.70,309.26 375.01,309.93 376.85,309.96 C383.68,310.05 391.00,316.22 391.00,321.90 C391.00,323.16 391.89,325.32 392.99,326.71 C395.53,329.94 395.03,330.62 389.71,331.22 C383.08,331.97 380.08,334.54 376.32,342.68 C375.74,343.94 375.25,345.04 374.85,346.05 C375.16,345.24 375.52,344.41 375.92,343.51 C377.51,340.01 378.65,336.99 378.47,336.80 C378.28,336.61 377.91,335.34 377.65,333.98 C376.29,326.80 373.02,323.84 370.21,327.25 C369.11,328.60 366.75,339.24 366.85,342.47 C366.88,343.55 366.43,344.74 365.84,345.10 C364.14,346.15 363.95,355.77 365.61,356.40 C367.52,357.14 367.36,361.45 365.37,363.13 C364.48,363.88 361.89,365.05 359.62,365.72 L 355.50 366.93 L 361.00 366.40 C364.02,366.10 367.91,365.43 369.62,364.89 C372.71,363.94 372.75,363.85 372.89,356.90 C372.91,356.00 372.95,355.16 373.00,354.36 C372.95,355.36 372.92,356.45 372.90,357.70 C372.86,361.99 372.98,366.17 373.16,367.00 C373.43,368.19 372.58,368.44 369.00,368.21 C366.52,368.05 358.24,367.97 350.60,368.04 C334.99,368.17 332.58,368.96 331.65,374.30 C331.34,376.06 330.61,379.98 330.02,383.00 C329.44,386.02 328.89,389.74 328.80,391.25 C328.71,392.76 328.20,394.00 327.66,394.00 C326.56,394.00 327.47,372.36 328.78,367.50 C329.23,365.85 329.57,358.65 329.54,351.50 C329.51,341.62 329.45,339.24 328.45,338.70 C329.41,339.05 329.72,340.22 330.14,343.50 C330.49,346.25 331.10,349.51 331.50,350.75 C331.97,352.18 331.82,353.00 331.12,353.00 C329.03,353.00 329.99,357.51 332.71,360.44 C334.62,362.50 335.03,363.49 334.09,363.80 C332.08,364.47 334.87,365.97 338.16,365.98 C340.02,366.00 340.75,365.53 340.59,364.42 ZM 226.00 345.89 C212.31,347.67 207.00,348.03 207.00,347.16 C207.00,346.69 201.04,346.02 193.75,345.66 C159.71,343.99 134.25,335.69 111.00,318.66 C103.50,313.17 87.20,296.62 83.27,290.50 C81.50,287.75 79.65,285.02 79.16,284.44 C78.67,283.85 76.07,278.80 73.39,273.22 C68.28,262.61 66.63,261.22 63.00,264.50 C60.55,266.72 47.07,267.62 44.58,265.73 C42.70,264.31 42.72,264.15 45.48,259.39 C47.03,256.70 51.54,249.55 55.49,243.50 C59.45,237.45 64.58,229.52 66.89,225.89 C70.37,220.42 74.09,217.00 76.55,217.00 C77.89,217.00 76.71,221.95 75.00,223.50 C73.90,224.50 73.00,225.68 73.00,226.14 C73.00,226.59 68.68,233.73 63.40,242.00 C57.24,251.66 54.02,257.61 54.42,258.65 C54.94,260.01 56.20,260.16 62.77,259.62 C67.02,259.26 71.01,259.32 71.62,259.74 C72.24,260.16 74.87,264.73 77.46,269.90 C85.98,286.90 94.51,298.02 107.17,308.64 C118.24,317.92 122.89,321.00 134.63,326.85 C146.37,332.70 156.73,336.10 172.14,339.14 C184.25,341.53 205.49,342.16 231.75,340.92 C240.76,340.50 244.00,340.65 244.00,341.51 C244.00,342.80 237.47,344.39 226.00,345.89 ZM 367.21 256.98 C365.21,255.57 364.59,256.65 364.70,260.50 C364.78,263.30 364.07,264.61 360.90,267.47 C358.47,269.67 355.98,271.00 354.31,271.00 C351.74,271.00 351.71,271.06 353.56,272.42 C356.65,274.68 355.00,274.97 346.48,273.65 C340.09,272.66 338.44,272.05 338.15,270.57 C337.83,268.89 338.29,268.78 342.90,269.39 C348.89,270.19 349.36,269.23 345.50,264.00 C344.12,262.14 343.00,260.16 343.00,259.62 C343.00,257.44 347.61,252.01 349.50,251.98 C351.35,251.94 351.37,251.84 349.79,250.64 C347.70,249.05 341.42,249.31 336.52,251.09 L 340.50 249.20 L 344.13 240.35 C346.13,235.48 348.07,229.81 348.43,227.75 C348.82,225.54 349.66,224.00 350.47,224.00 C351.39,224.00 352.13,222.08 352.68,218.25 C353.84,210.14 353.46,187.36 352.08,182.00 C350.09,174.27 343.77,159.79 339.34,152.82 C335.04,146.04 321.22,131.00 319.30,131.00 C318.72,131.00 317.67,130.30 316.96,129.45 C313.35,125.11 290.64,115.00 284.47,115.00 C283.17,115.00 280.99,113.96 279.62,112.70 C275.57,108.94 276.55,103.97 282.90,96.00 C284.49,94.00 285.14,93.75 286.15,94.75 C287.15,95.75 286.96,96.90 285.20,100.53 C281.29,108.57 281.96,109.59 293.00,112.38 C328.38,121.33 356.18,155.90 358.63,194.00 C359.67,210.25 355.84,230.42 349.03,244.50 C346.61,249.50 347.56,250.47 355.81,251.40 C360.79,251.96 362.32,252.68 366.73,256.55 ZM 238.25 253.54 C235.64,253.56 227.88,253.93 221.00,254.36 C209.90,255.06 208.11,254.94 205.00,253.32 C198.76,250.08 197.96,243.21 201.98,227.50 C202.97,223.65 205.23,214.20 207.00,206.50 C208.78,198.80 211.28,188.30 212.55,183.17 C213.83,178.04 214.63,173.20 214.33,172.41 C213.72,170.82 215.93,166.93 219.82,162.75 C222.71,159.64 224.56,159.14 223.52,161.75 C223.14,162.71 222.66,164.18 222.45,165.00 C222.25,165.82 221.38,168.45 220.51,170.84 C219.65,173.23 217.41,182.00 215.54,190.34 C213.67,198.68 210.47,212.25 208.42,220.50 C206.38,228.75 204.66,237.63 204.60,240.23 C204.39,249.86 211.57,252.58 230.60,250.04 C236.83,249.21 239.56,249.18 239.81,249.93 C240.01,250.52 240.80,251.00 241.58,251.00 C242.36,251.00 243.00,251.57 243.00,252.26 C243.00,253.09 241.38,253.52 238.25,253.54 ZM 101.74 148.37 C98.47,149.25 57.00,149.14 56.99,148.25 C56.88,140.36 51.87,107.59 49.07,96.50 C47.96,92.10 46.33,85.57 45.45,82.00 C44.57,78.43 43.42,74.69 42.89,73.71 C41.73,71.54 42.52,70.00 44.81,70.00 C46.86,70.00 48.10,72.71 51.41,84.50 C55.52,99.13 58.71,116.35 60.38,133.00 L 61.54 144.50 L 72.02 145.13 C77.78,145.47 87.09,145.81 92.69,145.88 C102.46,145.99 106.48,147.10 101.74,148.37 ZM 305.00 247.19 C301.72,248.58 277.13,249.27 274.30,248.05 C273.09,247.53 271.35,245.64 270.43,243.86 C268.22,239.59 268.89,232.55 273.59,211.00 C275.56,201.93 277.55,192.48 278.00,190.00 C281.33,171.70 286.49,159.00 290.58,159.00 C291.49,159.00 291.13,160.80 289.36,165.14 C287.99,168.52 284.85,180.78 282.39,192.39 C279.93,204.00 277.43,215.75 276.85,218.50 C273.51,234.19 273.29,238.90 275.75,241.94 C278.18,244.94 283.47,245.89 292.66,244.97 C297.20,244.52 300.64,244.58 300.83,245.10 C301.02,245.59 302.59,246.03 304.33,246.06 C307.48,246.13 307.48,246.13 305.00,247.19 ZM 234.86 145.09 C234.32,145.42 226.15,145.76 216.69,145.85 C201.50,146.00 199.01,145.79 195.24,144.06 C190.52,141.87 189.30,139.68 187.98,131.00 C187.52,127.97 185.94,121.00 184.45,115.50 C180.55,101.01 179.98,98.31 179.17,90.16 C178.44,82.88 178.45,82.81 181.29,80.79 C183.22,79.42 184.48,79.08 185.16,79.76 C185.84,80.44 185.82,80.99 185.09,81.45 C183.27,82.57 183.86,91.37 186.45,101.71 C189.90,115.51 192.74,127.86 193.47,132.25 C193.81,134.31 195.15,137.23 196.46,138.75 L 198.83 141.50 L 216.16 141.50 C230.35,141.50 233.71,141.77 234.66,142.99 C235.39,143.93 235.46,144.71 234.86,145.09 ZM 257.48 145.44 C253.28,147.20 248.00,147.51 248.00,146.00 C248.00,145.45 246.91,145.00 245.57,145.00 C243.36,145.00 243.09,144.50 242.52,139.25 C241.44,129.36 234.38,100.74 231.44,94.33 C230.64,92.59 229.70,89.77 229.37,88.08 C229.03,86.39 228.13,85.00 227.37,85.00 C226.23,85.00 226.21,84.64 227.23,83.00 C229.20,79.85 231.37,80.64 233.38,85.25 C238.89,97.93 244.94,119.98 247.54,136.88 L 248.22 141.25 L 253.01 140.69 C256.90,140.22 258.12,140.47 259.50,142.00 C261.13,143.81 261.05,143.95 257.48,145.44 ZM 145.61 146.82 C144.99,147.83 127.29,148.28 126.71,147.30 C126.46,146.86 125.94,142.90 125.58,138.50 C125.21,134.10 124.48,128.48 123.95,126.00 C123.43,123.53 122.08,117.00 120.96,111.50 C119.84,106.00 118.22,98.24 117.35,94.26 C115.62,86.32 116.09,81.13 118.77,78.70 C120.39,77.23 120.48,77.50 120.16,83.07 C119.97,86.49 120.24,89.00 120.80,89.00 C121.33,89.00 122.00,90.24 122.28,91.75 C122.56,93.26 124.00,100.12 125.48,107.00 C126.96,113.88 128.94,124.90 129.87,131.50 L 131.57 143.50 L 136.54 143.59 C141.49,143.67 146.46,145.44 145.61,146.82 ZM 310.84 226.68 C308.07,229.62 306.57,229.66 307.45,226.75 C307.83,225.51 310.51,213.70 313.42,200.50 C317.10,183.76 318.41,175.95 317.77,174.68 C317.03,173.21 315.83,172.91 311.44,173.11 C305.41,173.39 304.11,172.78 305.98,170.52 C307.91,168.20 319.16,168.42 321.35,170.83 C323.83,173.58 323.45,177.12 318.01,201.75 C314.18,219.08 312.51,224.89 310.84,226.68 ZM 163.69 259.68 C159.74,259.77 152.61,260.24 147.85,260.71 C143.09,261.18 138.81,261.49 138.35,261.39 C126.78,259.05 126.09,258.79 124.39,256.20 C121.15,251.27 124.00,231.29 128.33,228.56 C130.83,226.99 131.01,228.12 129.46,235.54 C127.20,246.31 127.50,251.18 130.58,254.08 C132.85,256.21 134.24,256.54 142.33,256.82 C147.37,257.00 153.98,256.75 157.00,256.28 C160.02,255.80 164.58,255.59 167.13,255.80 C170.86,256.11 171.68,256.51 171.32,257.84 C170.97,259.17 169.45,259.54 163.69,259.68 ZM 114.23 200.50 C113.06,202.10 89.76,202.44 88.25,200.89 C86.33,198.91 86.73,194.68 90.06,182.08 C94.61,164.86 95.83,161.51 98.46,159.04 C101.86,155.85 103.12,157.23 100.93,161.74 C99.92,163.81 97.40,172.08 95.32,180.12 C95.18,180.65 95.05,181.16 94.92,181.66 C92.62,190.54 91.57,194.60 93.13,196.45 C94.45,198.01 97.61,198.01 103.43,198.00 C103.81,198.00 104.21,198.00 104.62,198.00 C114.61,198.00 115.84,198.32 114.23,200.50 ZM 69.82 201.72 C69.56,203.05 68.22,203.50 63.83,203.75 C57.47,204.12 56.29,203.22 57.85,199.19 C59.58,194.75 65.00,173.50 65.00,171.17 C65.00,169.23 64.47,169.00 59.88,169.00 C54.82,169.00 54.76,168.96 55.30,166.25 C57.04,157.58 61.00,154.63 61.00,162.00 C61.00,165.91 61.08,166.00 64.52,166.00 C70.50,166.00 70.78,168.40 66.65,184.54 C64.70,192.15 63.34,198.74 63.61,199.19 C63.89,199.63 65.47,200.00 67.13,200.00 C69.44,200.00 70.07,200.40 69.82,201.72 ZM 172.68 235.75 C169.15,239.66 167.98,238.56 170.00,233.25 C170.99,230.64 172.11,226.45 172.49,223.94 C173.43,217.62 171.95,216.53 163.43,217.32 C158.60,217.78 156.78,217.60 156.42,216.65 C156.15,215.95 156.98,212.03 158.26,207.94 C159.92,202.61 161.11,200.41 162.44,200.15 C164.10,199.83 164.22,200.25 163.58,204.15 C163.51,204.58 163.44,204.99 163.37,205.38 C162.73,209.27 162.43,211.04 163.18,211.91 C163.87,212.71 165.46,212.75 168.50,213.00 C175.68,213.61 176.65,214.14 177.49,217.96 C178.32,221.74 175.33,232.80 172.68,235.75 ZM 180.45 146.84 C179.05,147.48 177.81,147.92 177.70,147.83 C177.59,147.73 174.57,147.39 171.00,147.08 L 164.50 146.50 L 163.14 138.74 C161.58,129.79 160.97,129.36 150.98,130.27 C144.42,130.86 143.64,130.55 145.07,127.87 C145.93,126.26 147.30,126.00 155.01,126.00 C164.99,126.00 166.06,126.69 167.48,134.00 C167.86,135.93 168.68,139.00 169.31,140.84 C170.46,144.16 170.48,144.17 175.57,143.53 C179.33,143.06 180.97,143.26 181.83,144.29 C182.75,145.40 182.47,145.92 180.45,146.84 ZM 296.07 144.96 C293.65,146.26 293.00,146.27 293.00,145.00 C293.00,144.43 289.95,144.00 285.84,144.00 L 278.68 144.00 L 268.84 133.94 C258.85,123.72 257.24,121.00 261.19,121.00 C262.61,121.00 266.81,124.37 273.17,130.61 C281.81,139.10 283.26,140.15 285.57,139.57 C287.03,139.21 288.78,139.40 289.52,140.02 C290.25,140.62 291.45,141.01 292.18,140.86 C294.06,140.50 298.00,141.97 298.00,143.03 C298.00,143.53 297.13,144.40 296.07,144.96 Z" fill="#2c3e50"/>
+            </g>
+        </svg>
+    </div>
+
+    <p class="subtitle">Metadata Fixer & P2P Sharing</p>
     
     <div class="section">
-        <h3>📥 Ricevi una foto</h3>
-        <input type="text" id="inputCodiceAmico" placeholder="Codice amico o QR">
-        <button class="btn btn-receive" onclick="connettiERicevi()">Connetti e Ricevi</button>
+        <h3>📥 Ricevi Foto</h3>
+        <input type="text" id="inputCodiceAmico" placeholder="Inserisci Codice Amico">
+        <button class="btn btn-receive" onclick="connettiERicevi()">
+            <i class="fa-solid fa-link"></i> Connetti e Ricevi
+        </button>
     </div>
 
     <div id="stato">Inizializzazione sistema...</div>
@@ -46,20 +165,26 @@
     <div class="section">
         <h3>📤 Ripara e Invia</h3>
         <div class="drop-zone" onclick="document.getElementById('inputFoto').click()">
-            <span id="label">Seleziona la foto panoramica</span>
+            <span id="label">Trascina qui la foto 360</span>
             <input type="file" id="inputFoto" accept="image/jpeg" style="display:none">
         </div>
         
-        <button id="btnRipara" class="btn hidden" onclick="processaFoto()">🪄 Ripara Metadati 360</button>
+        <button id="btnRipara" class="btn hidden" style="margin-top:15px;" onclick="processaFoto()">🪄 Ripara Metadati 360</button>
 
         <div id="downloadArea" class="hidden">
-            <p style="color: #27ae60; font-weight: bold;">✨ Foto riparata!</p>
-            <a id="linkDownload" href="#" class="btn" style="text-decoration:none; display:block; line-height:20px; box-sizing:border-box;">💾 Scarica Locale</a>
+            <p style="color: var(--secondary-color); font-weight: bold; margin-top:15px;">✨ Foto Pronta!</p>
+            <a id="linkDownload" href="#" class="btn btn-local" style="text-decoration:none;">
+                <i class="fa-solid fa-download"></i> Scarica Locale
+            </a>
             
+            <button id="btnShareSmart" class="btn btn-share">
+                <i class="fa-solid fa-share-nodes"></i> Condividi Link di Ritiro
+            </button>
+
             <hr>
-            <p><small>Fai inquadrare questo QR per inviare:</small></p>
+            <p><small>Inquadra per ricevere istantaneamente:</small></p>
             <div id="qrcode"></div>
-            <div id="mioIDDisplay" class="code-display">Generazione codice...</div>
+            <div id="mioIDDisplay" class="code-display">Generazione...</div>
         </div>
     </div>
 </div>
@@ -67,7 +192,8 @@
 <script>
     let fileOriginale = null;
     let blobRiparato = null;
-    let peer = null;
+    let peer = new Peer();
+    let mioID = "";
 
     const stato = document.getElementById('stato');
     const inputFoto = document.getElementById('inputFoto');
@@ -76,117 +202,136 @@
     const mioIDDisplay = document.getElementById('mioIDDisplay');
     const qrcodeDiv = document.getElementById('qrcode');
     const inputCodiceAmico = document.getElementById('inputCodiceAmico');
+    const btnShareSmart = document.getElementById('btnShareSmart');
 
-    // DOMINIO UFFICIALE
-    const DOMINIO = "https://marcaugel.github.io/back-to-360/";
-
-    peer = new Peer();
-    
-    peer.on('open', (id) => {
-        stato.innerText = "Sistema pronto";
-        mioIDDisplay.innerText = id;
-        generaQR(id);
-        controllaURL(id);
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const connectId = urlParams.get('connect');
+        if (connectId) {
+            inputCodiceAmico.value = connectId;
+            stato.innerText = "Codice caricato dall'URL. Clicca 'Connetti'.";
+        }
     });
 
-    peer.on('error', (err) => {
-        stato.innerText = "Errore connessione";
-        console.error(err);
+    peer.on('open', (id) => {
+        mioID = id;
+        stato.innerText = "✅ Sistema Pronto";
+        mioIDDisplay.innerText = id;
+        generaQR(id);
     });
 
     function generaQR(id) {
-        const urlCondivisione = DOMINIO + "#connect=" + id;
+        const urlCondivisione = window.location.origin + window.location.pathname + "?connect=" + id;
         qrcodeDiv.innerHTML = ""; 
-        new QRCode(qrcodeDiv, {
-            text: urlCondivisione,
-            width: 150,
-            height: 150,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
+        new QRCode(qrcodeDiv, { 
+            text: urlCondivisione, 
+            width: 160, 
+            height: 160,
+            colorDark : "#2c3e50",
+            colorLight : "#ffffff"
         });
-    }
 
-    function controllaURL(mioID) {
-        const hash = window.location.hash;
-        if (hash.includes("connect=")) {
-            const idAmico = hash.split("connect=")[1];
-            if (idAmico && idAmico !== mioID) {
-                inputCodiceAmico.value = idAmico;
-                stato.innerText = "Codice QR rilevato!";
-                // Opzionale: connettiERicevi(); // Scommenta per connessione immediata al QR
-            }
-        }
+        btnShareSmart.onclick = async () => {
+            const dataToShare = {
+                title: 'Ricevi la mia Foto 360',
+                text: `Ho riparato una foto 360 per te! Clicca il link per riceverla (Codice P2P: ${id}):`,
+                url: urlCondivisione
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(dataToShare);
+                } else {
+                    await navigator.clipboard.writeText(urlCondivisione);
+                    alert("Link di ritiro copiato! Invialo al tuo amico.");
+                }
+            } catch (err) { console.log("Sharing failed", err); }
+        };
     }
 
     inputFoto.addEventListener('change', async (e) => {
         fileOriginale = e.target.files[0];
         if (!fileOriginale) return;
         stato.innerText = "Analisi file...";
+        
         try {
             const tags = await ExifReader.load(fileOriginale);
-            const is360 = tags['ProjectionType'] || tags['GPano:ProjectionType'];
-            if (is360) {
+            if (tags['ProjectionType'] || tags['GPano:ProjectionType']) {
                 stato.innerText = "✅ Foto già 360.";
-                btnRipara.classList.add('hidden');
-                downloadArea.classList.remove('hidden');
+                blobRiparato = fileOriginale;
+                aggiornaDownloadArea();
             } else {
-                stato.innerText = "❌ Metadati mancanti.";
+                stato.innerText = "⚠️ Metadati 360 mancanti.";
                 btnRipara.classList.remove('hidden');
                 downloadArea.classList.add('hidden');
             }
-        } catch (err) { stato.innerText = "Errore file JPEG."; }
+        } catch (err) { stato.innerText = "❌ Carica un file JPEG."; }
     });
 
     function processaFoto() {
         const reader = new FileReader();
         reader.onload = function(e) {
             const uint8 = new Uint8Array(e.target.result);
-            const xmpStr = `http://ns.adobe.com/xap/1.0/\0<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?><x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description rdf:about="" xmlns:GPano="http://ns.google.com/photos/1.0/panorama/"><GPano:ProjectionType>equirectangular</GPano:ProjectionType><GPano:UsePanoramaViewer>True</GPano:UsePanoramaViewer><GPano:FullPanoWidthPixels>4000</GPano:FullPanoWidthPixels><GPano:FullPanoHeightPixels>2000</GPano:FullPanoHeightPixels></rdf:Description></rdf:RDF></x:xmpmeta><?xpacket end="w"?>`;
+            const xmpStr = `http://ns.adobe.com/xap/1.0/\0<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?><x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description rdf:about="" xmlns:GPano="http://ns.google.com/photos/1.0/panorama/"><GPano:ProjectionType>equirectangular</GPano:ProjectionType><GPano:UsePanoramaViewer>True</GPano:UsePanoramaViewer></rdf:Description></rdf:RDF></x:xmpmeta><?xpacket end="w"?>`;
             const xmpBytes = new TextEncoder().encode(xmpStr);
             const xmpLen = xmpBytes.length + 2;
             const app1 = new Uint8Array([0xFF, 0xE1, (xmpLen >> 8) & 0xFF, xmpLen & 0xFF]);
             const finale = new Uint8Array(uint8.length + app1.length + xmpBytes.length);
+            
             finale.set(uint8.slice(0, 2), 0);
             finale.set(app1, 2);
             finale.set(xmpBytes, 6);
             finale.set(uint8.slice(2), 6 + xmpBytes.length);
+            
             blobRiparato = new Blob([finale], {type: "image/jpeg"});
-            document.getElementById('linkDownload').href = URL.createObjectURL(blobRiparato);
-            document.getElementById('linkDownload').download = "360_" + fileOriginale.name;
-            stato.innerText = "✨ Foto riparata!";
+            aggiornaDownloadArea();
+            
+            stato.innerText = "✨ Riparazione completata!";
             btnRipara.classList.add('hidden');
-            downloadArea.classList.remove('hidden');
         };
         reader.readAsArrayBuffer(fileOriginale);
     }
 
+    function aggiornaDownloadArea() {
+        const link = document.getElementById('linkDownload');
+        link.href = URL.createObjectURL(blobRiparato);
+        link.download = "360_FIXED_" + (fileOriginale ? fileOriginale.name : "photo.jpg");
+        downloadArea.classList.remove('hidden');
+    }
+
     peer.on('connection', (conn) => {
         conn.on('open', () => {
-            stato.innerText = "Invio in corso...";
-            conn.send({ 
-                file: blobRiparato || fileOriginale, 
-                name: "BackTo360_" + (fileOriginale ? fileOriginale.name : "photo.jpg") 
-            });
+            if (blobRiparato) {
+                stato.innerText = "📤 Invio file in corso...";
+                conn.send({ 
+                    file: blobRiparato, 
+                    name: "360_FIXED_" + (fileOriginale ? fileOriginale.name : "photo.jpg") 
+                });
+            }
         });
     });
 
     function connettiERicevi() {
         const id = inputCodiceAmico.value.trim();
-        if(!id) return alert("Inserisci il codice!");
-        stato.innerText = "Connessione...";
+        if (!id) return alert("Inserisci un codice!");
+        
         const conn = peer.connect(id);
+        stato.innerText = "🔗 Connessione P2P...";
+        
         conn.on('data', (data) => {
-            if (data.file) {
-                const url = URL.createObjectURL(new Blob([data.file]));
-                const a = document.createElement('a');
-                a.href = url; a.download = data.name; a.click();
-                stato.innerText = "🎁 Ricevuta!";
-            }
+            const blob = new Blob([data.file], {type: "image/jpeg"});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = data.name;
+            a.click();
+            stato.innerText = "🎁 Foto ricevuta e scaricata!";
         });
-        conn.on('open', () => stato.innerText = "Connesso! Ricezione...");
+
+        conn.on('error', (err) => {
+            stato.innerText = "❌ Errore di connessione.";
+            console.error(err);
+        });
     }
 </script>
-
 </body>
 </html>
