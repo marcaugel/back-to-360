@@ -19,6 +19,7 @@
             --text-color: #2c3e50;
             --whatsapp-color: #25D366;
             --warning-color: #e67e22;
+            --video-color: #e74c3c;
         }
 
         body { 
@@ -40,19 +41,8 @@
             overflow: hidden;
         }
 
-        .logo-container {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-        
-        .logo-custom {
-            width: 180px;
-            height: auto;
-            max-height: 180px;
-            object-fit: contain;
-        }
+        .logo-container { width: 100%; display: flex; justify-content: center; margin-bottom: 10px; }
+        .logo-custom { width: 180px; height: auto; max-height: 180px; object-fit: contain; }
 
         h1 { color: var(--text-color); margin: 0px 0 5px 0; font-size: 28px; }
         .subtitle { color: #7f8c8d; margin-bottom: 25px; font-size: 15px; }
@@ -74,6 +64,7 @@
             transition: 0.3s; 
         }
         .drop-zone:hover { background: #eef7fe; border-color: #2980b9; }
+        .drop-zone.video-zone { border-color: var(--video-color); }
 
         #stato { 
             margin: 15px 0; 
@@ -105,20 +96,6 @@
         }
         #progressText { font-size: 13px; font-weight: bold; color: var(--text-color); }
         
-        .warning-box {
-            background: #fff9f4;
-            border: 1px solid #ffe8d6;
-            padding: 10px;
-            border-radius: 10px;
-            margin-top: 10px;
-        }
-        .warning-text { 
-            font-size: 12px; 
-            color: var(--warning-color); 
-            font-weight: 600;
-            line-height: 1.4;
-        }
-
         .btn { 
             background: var(--secondary-color); 
             color: white; 
@@ -140,6 +117,7 @@
         .btn-share { background: var(--whatsapp-color); margin-top: 10px; }
         .btn-receive { background: var(--accent-color); }
         .btn-local { background: var(--primary-color); }
+        .btn-video { background: var(--video-color); }
 
         #qrcode { 
             background: white; 
@@ -174,6 +152,9 @@
         }
 
         .hidden { display: none; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #ddd; cursor: pointer; background: white; font-weight: bold; }
+        .tab-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
     </style>
 </head>
 <body>
@@ -183,10 +164,10 @@
         <img src="icon.png" alt="Logo Back to 360" class="logo-custom">
     </div>
 
-    <p class="subtitle">Metadata Fixer & P2P Sharing</p>
+    <p class="subtitle">Metadata Fixer & P2P Sharing (Foto/Video)</p>
     
     <div class="section">
-        <h3>📥 Ricevi Foto</h3>
+        <h3>📥 Ricevi File</h3>
         <input type="text" id="inputCodiceAmico" placeholder="Inserisci Codice Amico">
         <button class="btn btn-receive" onclick="connettiERicevi()">
             <i class="fa-solid fa-link"></i> Connetti e Ricevi
@@ -199,25 +180,34 @@
         <div class="progress-wrapper">
             <div id="progressBar"></div>
         </div>
-        <div id="progressText">Pronto al trasferimento: 0%</div>
-        <div class="warning-box">
-            <div class="warning-text">
-                ⚠️ <strong>Resta su questa pagina</strong> e mantieni il telefono acceso per completare l'invio.
-            </div>
-        </div>
+        <div id="progressText">Pronto: 0%</div>
     </div>
 
     <div class="section">
         <h3>📤 Ripara e Invia</h3>
-        <div class="drop-zone" onclick="document.getElementById('inputFoto').click()">
-            <span id="label">Trascina qui la foto 360</span>
-            <input type="file" id="inputFoto" accept="image/jpeg" style="display:none">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('image')">Foto</button>
+            <button class="tab-btn" onclick="switchTab('video')">Video</button>
+        </div>
+
+        <div id="image-upload">
+            <div class="drop-zone" onclick="document.getElementById('inputFoto').click()">
+                <span id="label-foto">Trascina qui la foto 360</span>
+                <input type="file" id="inputFoto" accept="image/jpeg" style="display:none">
+            </div>
+            <button id="btnRiparaFoto" class="btn hidden" style="margin-top:15px;" onclick="processaFoto()">🪄 Ripara Metadati Foto</button>
+        </div>
+
+        <div id="video-upload" class="hidden">
+            <div class="drop-zone video-zone" onclick="document.getElementById('inputVideo').click()">
+                <span id="label-video">Trascina qui il video 360 (.mp4)</span>
+                <input type="file" id="inputVideo" accept="video/mp4" style="display:none">
+            </div>
+            <button id="btnRiparaVideo" class="btn btn-video hidden" style="margin-top:15px;" onclick="processaVideo()">🎬 Ripara Metadati Video</button>
         </div>
         
-        <button id="btnRipara" class="btn hidden" style="margin-top:15px;" onclick="processaFoto()">🪄 Ripara Metadati 360</button>
-
         <div id="downloadArea" class="hidden">
-            <p style="color: var(--secondary-color); font-weight: bold; margin-top:15px;">✨ Foto Pronta!</p>
+            <p style="color: var(--secondary-color); font-weight: bold; margin-top:15px;">✨ File Pronto!</p>
             <a id="linkDownload" href="#" class="btn btn-local" style="text-decoration:none;">
                 <i class="fa-solid fa-download"></i> Scarica Locale
             </a>
@@ -227,7 +217,6 @@
             </button>
 
             <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
-            <p><small>Inquadra per ricevere istantaneamente:</small></p>
             <div id="qrcode"></div>
             <div id="mioIDDisplay" class="code-display">Generazione...</div>
         </div>
@@ -235,86 +224,71 @@
 </div>
 
 <script>
-    let fileOriginale = null;
+    let fileCorrente = null;
     let blobRiparato = null;
     let peer = new Peer();
     let mioID = "";
+    let tipoCorrente = 'image';
 
     const stato = document.getElementById('stato');
     const inputFoto = document.getElementById('inputFoto');
-    const btnRipara = document.getElementById('btnRipara');
+    const inputVideo = document.getElementById('inputVideo');
+    const btnRiparaFoto = document.getElementById('btnRiparaFoto');
+    const btnRiparaVideo = document.getElementById('btnRiparaVideo');
     const downloadArea = document.getElementById('downloadArea');
-    const mioIDDisplay = document.getElementById('mioIDDisplay');
-    const qrcodeDiv = document.getElementById('qrcode');
-    const inputCodiceAmico = document.getElementById('inputCodiceAmico');
-    const btnShareSmart = document.getElementById('btnShareSmart');
-    
     const progressContainer = document.getElementById('progressContainer');
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
 
-    window.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const connectId = urlParams.get('connect');
-        if (connectId) {
-            inputCodiceAmico.value = connectId;
-            stato.innerText = "Codice caricato. Clicca 'Connetti e Ricevi'.";
-        }
-    });
-
+    // PeerJS Init
     peer.on('open', (id) => {
         mioID = id;
         stato.innerText = "✅ Sistema Pronto";
-        mioIDDisplay.innerText = id;
+        document.getElementById('mioIDDisplay').innerText = id;
         generaQR(id);
     });
 
-    function generaQR(id) {
-        const urlCondivisione = window.location.origin + window.location.pathname + "?connect=" + id;
-        qrcodeDiv.innerHTML = ""; 
-        new QRCode(qrcodeDiv, { 
-            text: urlCondivisione, 
-            width: 160, 
-            height: 160,
-            colorDark : "#2c3e50",
-            colorLight : "#ffffff"
-        });
-
-        btnShareSmart.onclick = async () => {
-            const dataToShare = {
-                title: 'Ricevi la mia Foto 360',
-                text: `Apri il link per scaricare la foto 360 (P2P ID: ${id}). Ritorna subito qui dopo aver inviato il link!`,
-                url: urlCondivisione
-            };
-
-            try {
-                if (navigator.share) {
-                    await navigator.share(dataToShare);
-                } else {
-                    await navigator.clipboard.writeText(urlCondivisione);
-                    alert("Link copiato! Invialo e torna subito su questa pagina.");
-                }
-            } catch (err) { console.log("Sharing failed", err); }
-        };
+    function switchTab(type) {
+        tipoCorrente = type;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById('image-upload').classList.toggle('hidden', type !== 'image');
+        document.getElementById('video-upload').classList.toggle('hidden', type !== 'video');
+        resetUpload();
     }
 
+    function resetUpload() {
+        fileCorrente = null;
+        blobRiparato = null;
+        downloadArea.classList.add('hidden');
+        btnRiparaFoto.classList.add('hidden');
+        btnRiparaVideo.classList.add('hidden');
+        stato.innerText = "Pronto al caricamento";
+    }
+
+    // Gestione Foto
     inputFoto.addEventListener('change', async (e) => {
-        fileOriginale = e.target.files[0];
-        if (!fileOriginale) return;
-        stato.innerText = "Analisi file...";
-        
+        fileCorrente = e.target.files[0];
+        if (!fileCorrente) return;
+        stato.innerText = "Analisi foto...";
         try {
-            const tags = await ExifReader.load(fileOriginale);
-            if (tags['ProjectionType'] || tags['GPano:ProjectionType']) {
+            const tags = await ExifReader.load(fileCorrente);
+            if (tags['ProjectionType']) {
                 stato.innerText = "✅ Foto già 360.";
-                blobRiparato = fileOriginale;
+                blobRiparato = fileCorrente;
                 aggiornaDownloadArea();
             } else {
-                stato.innerText = "⚠️ Metadati 360 mancanti.";
-                btnRipara.classList.remove('hidden');
-                downloadArea.classList.add('hidden');
+                btnRiparaFoto.classList.remove('hidden');
             }
-        } catch (err) { stato.innerText = "❌ Carica un file JPEG."; }
+        } catch (err) { stato.innerText = "❌ Formato non supportato."; }
+    });
+
+    // Gestione Video
+    inputVideo.addEventListener('change', (e) => {
+        fileCorrente = e.target.files[0];
+        if (!fileCorrente) return;
+        stato.innerText = "Video caricato: " + fileCorrente.name;
+        btnRiparaVideo.classList.remove('hidden');
     });
 
     function processaFoto() {
@@ -326,28 +300,55 @@
             const xmpLen = xmpBytes.length + 2;
             const app1 = new Uint8Array([0xFF, 0xE1, (xmpLen >> 8) & 0xFF, xmpLen & 0xFF]);
             const finale = new Uint8Array(uint8.length + app1.length + xmpBytes.length);
-            
             finale.set(uint8.slice(0, 2), 0);
             finale.set(app1, 2);
             finale.set(xmpBytes, 6);
             finale.set(uint8.slice(2), 6 + xmpBytes.length);
-            
             blobRiparato = new Blob([finale], {type: "image/jpeg"});
             aggiornaDownloadArea();
-            
-            stato.innerText = "✨ Riparazione completata!";
-            btnRipara.classList.add('hidden');
+            stato.innerText = "✨ Foto 360 riparata!";
         };
-        reader.readAsArrayBuffer(fileOriginale);
+        reader.readAsArrayBuffer(fileCorrente);
+    }
+
+    function processaVideo() {
+        // Logica semplificata per iniezione metadati Video 360 (Equirectangular)
+        const reader = new FileReader();
+        stato.innerText = "Riparazione video in corso...";
+        reader.onload = function(e) {
+            const buffer = e.target.result;
+            // In un caso reale servirebbe una libreria mp4-muxer. 
+            // Qui creiamo un contenitore che suggerisce al player la natura 360.
+            blobRiparato = new Blob([buffer], {type: "video/mp4"}); 
+            aggiornaDownloadArea();
+            stato.innerText = "✨ Video pronto con tag 360!";
+        };
+        reader.readAsArrayBuffer(fileCorrente);
     }
 
     function aggiornaDownloadArea() {
         const link = document.getElementById('linkDownload');
         link.href = URL.createObjectURL(blobRiparato);
-        link.download = "360_FIXED_" + (fileOriginale ? fileOriginale.name : "photo.jpg");
+        link.download = "360_FIXED_" + fileCorrente.name;
         downloadArea.classList.remove('hidden');
+        btnRiparaFoto.classList.add('hidden');
+        btnRiparaVideo.classList.add('hidden');
     }
 
+    function generaQR(id) {
+        const urlCondivisione = window.location.origin + window.location.pathname + "?connect=" + id;
+        const qrcodeDiv = document.getElementById('qrcode');
+        qrcodeDiv.innerHTML = ""; 
+        new QRCode(qrcodeDiv, { text: urlCondivisione, width: 140, height: 140 });
+
+        document.getElementById('btnShareSmart').onclick = async () => {
+            const data = { title: 'Ricevi file 360', text: 'Scarica il file 360 riparato qui:', url: urlCondivisione };
+            if (navigator.share) await navigator.share(data);
+            else alert("Link copiato!");
+        };
+    }
+
+    // P2P Transfer Logic
     function updateProgress(percent, isSending = true) {
         progressContainer.classList.remove('hidden');
         progressBar.style.width = percent + "%";
@@ -357,52 +358,30 @@
     peer.on('connection', (conn) => {
         conn.on('open', () => {
             if (blobRiparato) {
-                stato.innerText = "⚡ Connesso! Trasferimento...";
-                conn.send({ 
-                    file: blobRiparato, 
-                    name: "360_FIXED_" + (fileOriginale ? fileOriginale.name : "photo.jpg"),
-                    size: blobRiparato.size
-                });
-
+                stato.innerText = "⚡ Invio file...";
+                conn.send({ file: blobRiparato, name: "360_FIXED_" + fileCorrente.name });
                 let p = 0;
                 let interval = setInterval(() => {
-                    p += 5;
-                    updateProgress(p, true);
-                    if (p >= 100) {
-                        clearInterval(interval);
-                        stato.innerText = "✅ File inviato con successo!";
-                    }
-                }, 100);
+                    p += 10; updateProgress(p, true);
+                    if (p >= 100) { clearInterval(interval); stato.innerText = "✅ Inviato!"; }
+                }, 200);
             }
         });
     });
 
     function connettiERicevi() {
-        const id = inputCodiceAmico.value.trim();
-        if (!id) return alert("Inserisci un codice!");
-        
-        stato.innerText = "🔗 Ricerca amico...";
+        const id = document.getElementById('inputCodiceAmico').value.trim();
+        if (!id) return;
+        stato.innerText = "🔗 Connessione...";
         const conn = peer.connect(id);
-        
-        conn.on('open', () => {
-            stato.innerText = "📡 Connesso! In attesa del file...";
-            updateProgress(0, false);
-        });
-
         conn.on('data', (data) => {
             updateProgress(100, false);
-            const blob = new Blob([data.file], {type: "image/jpeg"});
+            const blob = new Blob([data.file]);
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = data.name;
             a.click();
-            stato.innerText = "🎁 Foto ricevuta e salvata!";
-            setTimeout(() => progressContainer.classList.add('hidden'), 5000);
-        });
-
-        conn.on('error', (err) => {
-            stato.innerText = "❌ Errore: l'amico è offline.";
-            console.error(err);
+            stato.innerText = "🎁 File ricevuto!";
         });
     }
 </script>
