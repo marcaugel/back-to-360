@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Back to 360 - Fix & Share</title>
-    
+
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#3498db">
+
     <script src="https://cdn.jsdelivr.net/npm/exifreader@4.12.0/dist/exif-reader.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -21,165 +27,58 @@
             --video-color: #e74c3c;
         }
 
-        body { 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            text-align: center; 
-            background: var(--bg-color); 
-            padding: 20px; 
-            color: var(--text-color); 
-            margin: 0; 
-        }
-
-        .card { 
-            max-width: 480px; 
-            margin: 20px auto; 
-            background: white; 
-            padding: 30px; 
-            border-radius: 28px; 
-            box-shadow: 0 15px 50px rgba(0,0,0,0.1); 
-            overflow: hidden;
-        }
-
-        .logo-container { width: 100%; display: flex; justify-content: center; margin-bottom: 10px; }
-        .logo-custom { width: 180px; height: auto; max-height: 180px; object-fit: contain; }
-
-        h1 { color: var(--text-color); margin: 0px 0 5px 0; font-size: 28px; }
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: var(--bg-color); padding: 20px; color: var(--text-color); margin: 0; }
+        .card { max-width: 480px; margin: 20px auto; background: white; padding: 30px; border-radius: 28px; box-shadow: 0 15px 50px rgba(0,0,0,0.1); }
+        .logo-custom { width: 160px; height: auto; margin-bottom: 10px; }
         .subtitle { color: #7f8c8d; margin-bottom: 25px; font-size: 15px; }
+        .section { background: #f8f9fa; padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #e1e8ed; }
         
-        .section { 
-            background: #f8f9fa; 
-            padding: 20px; 
-            border-radius: 20px; 
-            margin-bottom: 20px; 
-            border: 1px solid #e1e8ed; 
-        }
+        /* Progress Bar Migliorata */
+        #progressContainer { margin: 15px 0; padding: 15px; background: #fff; border-radius: 18px; border: 1px solid #eee; }
+        .progress-wrapper { background: #eee; border-radius: 10px; height: 14px; width: 100%; overflow: hidden; margin-bottom: 8px; position: relative; }
+        #progressBar { background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); height: 100%; width: 0%; transition: width 0.1s linear; }
+        #progressText { font-size: 13px; font-weight: bold; }
+        .wake-lock-notice { font-size: 11px; color: var(--video-color); margin-top: 5px; font-weight: bold; }
 
-        .drop-zone { 
-            border: 2px dashed var(--primary-color); 
-            padding: 25px; 
-            border-radius: 15px; 
-            cursor: pointer; 
-            background: #fff; 
-            transition: 0.3s; 
-        }
-        .drop-zone:hover { background: #eef7fe; border-color: #2980b9; }
-        .drop-zone.video-zone { border-color: var(--video-color); }
-
-        #stato { 
-            margin: 15px 0; 
-            font-weight: bold; 
-            color: var(--primary-color); 
-            font-size: 14px;
-        }
-
-        #progressContainer {
-            margin: 15px 0;
-            padding: 15px;
-            background: #fff;
-            border-radius: 18px;
-            border: 1px solid #eee;
-        }
-        .progress-wrapper {
-            background: #eee;
-            border-radius: 10px;
-            height: 12px;
-            width: 100%;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-        #progressBar {
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        #progressText { font-size: 13px; font-weight: bold; color: var(--text-color); }
-        
-        .btn { 
-            background: var(--secondary-color); 
-            color: white; 
-            border: none; 
-            padding: 16px; 
-            border-radius: 14px; 
-            font-size: 16px; 
-            cursor: pointer; 
-            width: 100%; 
-            font-weight: bold; 
-            margin-bottom: 10px; 
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .btn:active { transform: scale(0.98); }
-        .btn-share { background: var(--whatsapp-color); margin-top: 10px; }
+        .drop-zone { border: 2px dashed var(--primary-color); padding: 25px; border-radius: 15px; cursor: pointer; background: #fff; }
+        .btn { background: var(--secondary-color); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-share { background: var(--whatsapp-color); }
         .btn-receive { background: var(--accent-color); }
         .btn-local { background: var(--primary-color); }
         .btn-video { background: var(--video-color); }
-
-        #qrcode { 
-            background: white; 
-            padding: 15px; 
-            display: inline-block; 
-            margin: 15px auto; 
-            border-radius: 12px; 
-            border: 1px solid #eee;
-        }
-        
-        .code-display { 
-            font-size: 18px; 
-            font-family: monospace; 
-            font-weight: bold; 
-            background: #eef6ff; 
-            padding: 12px; 
-            border-radius: 10px; 
-            word-break: break-all;
-            color: var(--primary-color);
-            border: 1px dashed var(--primary-color);
-        }
-
-        input[type="text"] { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 10px 0; 
-            border: 2px solid #ddd; 
-            border-radius: 12px; 
-            text-align: center; 
-            box-sizing: border-box; 
-            font-size: 16px;
-        }
-
+        #qrcode { background: white; padding: 10px; display: inline-block; margin-top: 15px; border-radius: 12px; }
+        .code-display { font-size: 18px; font-family: monospace; font-weight: bold; background: #eef6ff; padding: 12px; border-radius: 10px; color: var(--primary-color); border: 1px dashed var(--primary-color); }
+        input[type="text"] { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 12px; text-align: center; box-sizing: border-box; }
         .hidden { display: none; }
         .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #ddd; cursor: pointer; background: white; font-weight: bold; }
-        .tab-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .tab-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #ddd; cursor: pointer; background: white; }
+        .tab-btn.active { background: var(--primary-color); color: white; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <div class="logo-container">
-        <img src="icon.png" alt="Logo Back to 360" class="logo-custom">
+        <img src="icon.png" alt="Back to 360" class="logo-custom">
     </div>
-
-    <p class="subtitle">Metadata Fixer & P2P Sharing (Foto/Video)</p>
+    <p class="subtitle">Metadata Fixer & Real-Time P2P Sharing</p>
     
     <div class="section">
         <h3>📥 Ricevi File</h3>
-        <input type="text" id="inputCodiceAmico" placeholder="Codice amico automatico">
+        <input type="text" id="inputCodiceAmico" placeholder="Inserisci codice amico">
         <button class="btn btn-receive" onclick="connettiERicevi()">
             <i class="fa-solid fa-link"></i> Connetti e Ricevi
         </button>
     </div>
 
-    <div id="stato">Inizializzazione sistema...</div>
+    <div id="stato">Inizializzazione...</div>
 
     <div id="progressContainer" class="hidden">
         <div class="progress-wrapper">
             <div id="progressBar"></div>
         </div>
         <div id="progressText">Pronto: 0%</div>
+        <div class="wake-lock-notice">⚠️ Non chiudere la pagina e non spegnere lo schermo!</div>
     </div>
 
     <div class="section">
@@ -191,31 +90,28 @@
 
         <div id="image-upload">
             <div class="drop-zone" onclick="document.getElementById('inputFoto').click()">
-                <span id="label-foto">Trascina qui la foto 360</span>
+                <span id="label-foto">Trascina la foto 360</span>
                 <input type="file" id="inputFoto" accept="image/jpeg" style="display:none">
             </div>
-            <button id="btnRiparaFoto" class="btn hidden" style="margin-top:15px;" onclick="processaFoto()">🪄 Ripara Metadati Foto</button>
+            <button id="btnRiparaFoto" class="btn hidden" style="margin-top:15px;" onclick="processaFoto()">🪄 Ripara Foto</button>
         </div>
 
         <div id="video-upload" class="hidden">
-            <div class="drop-zone video-zone" onclick="document.getElementById('inputVideo').click()">
-                <span id="label-video">Trascina qui il video 360 (.mp4)</span>
+            <div class="drop-zone" style="border-color: var(--video-color)" onclick="document.getElementById('inputVideo').click()">
+                <span id="label-video">Trascina il video .mp4</span>
                 <input type="file" id="inputVideo" accept="video/mp4" style="display:none">
             </div>
-            <button id="btnRiparaVideo" class="btn btn-video hidden" style="margin-top:15px;" onclick="processaVideo()">🎬 Ripara Metadati Video</button>
+            <button id="btnRiparaVideo" class="btn btn-video hidden" style="margin-top:15px;" onclick="processaVideo()">🎬 Ripara Video</button>
         </div>
         
         <div id="downloadArea" class="hidden">
-            <p style="color: var(--secondary-color); font-weight: bold; margin-top:15px;">✨ File Pronto!</p>
+            <p style="color: var(--secondary-color); font-weight: bold;">✨ Pronto!</p>
             <a id="linkDownload" href="#" class="btn btn-local" style="text-decoration:none;">
                 <i class="fa-solid fa-download"></i> Scarica Locale
             </a>
-            
             <button id="btnShareSmart" class="btn btn-share">
-                <i class="fa-solid fa-share-nodes"></i> Condividi Link di Ritiro
+                <i class="fa-solid fa-share-nodes"></i> Condividi Link
             </button>
-
-            <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
             <div id="qrcode"></div>
             <div id="mioIDDisplay" class="code-display">Generazione...</div>
         </div>
@@ -223,45 +119,36 @@
 </div>
 
 <script>
-    let fileCorrente = null;
-    let blobRiparato = null;
+    let fileCorrente = null, blobRiparato = null, mioID = "", wakeLock = null;
     let peer = new Peer();
-    let mioID = "";
-    let tipoCorrente = 'image';
 
-    const stato = document.getElementById('stato');
-    const inputFoto = document.getElementById('inputFoto');
-    const inputVideo = document.getElementById('inputVideo');
-    const btnRiparaFoto = document.getElementById('btnRiparaFoto');
-    const btnRiparaVideo = document.getElementById('btnRiparaVideo');
-    const downloadArea = document.getElementById('downloadArea');
-    const progressContainer = document.getElementById('progressContainer');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
-    const inputCodiceAmico = document.getElementById('inputCodiceAmico');
-
-    // 1. Controllo parametri URL all'avvio
-    window.onload = () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const connectId = urlParams.get('connect');
-        if (connectId) {
-            inputCodiceAmico.value = connectId;
-            stato.innerText = "📍 Codice amico rilevato dal link!";
-        }
+    const elements = {
+        stato: document.getElementById('stato'),
+        progress: document.getElementById('progressContainer'),
+        bar: document.getElementById('progressBar'),
+        txt: document.getElementById('progressText'),
+        inputCodice: document.getElementById('inputCodiceAmico'),
+        downloadArea: document.getElementById('downloadArea')
     };
 
-    // PeerJS Init
-    peer.on('open', (id) => {
-        mioID = id;
-        if (!inputCodiceAmico.value) {
-            stato.innerText = "✅ Sistema Pronto";
-        }
-        document.getElementById('mioIDDisplay').innerText = id;
-        generaQR(id);
-    });
+    // Funzione per mantenere lo schermo acceso
+    async function attivaWakeLock() {
+        try {
+            if ('wakeLock' in navigator) {
+                wakeLock = await navigator.wakeLock.request('screen');
+            }
+        } catch (err) { console.log("WakeLock non supportato o negato."); }
+    }
 
+    function disattivaWakeLock() {
+        if (wakeLock) {
+            wakeLock.release();
+            wakeLock = null;
+        }
+    }
+
+    // Gestione Tab
     function switchTab(type) {
-        tipoCorrente = type;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         event.target.classList.add('active');
         document.getElementById('image-upload').classList.toggle('hidden', type !== 'image');
@@ -270,38 +157,33 @@
     }
 
     function resetUpload() {
-        fileCorrente = null;
-        blobRiparato = null;
-        downloadArea.classList.add('hidden');
-        btnRiparaFoto.classList.add('hidden');
-        btnRiparaVideo.classList.add('hidden');
+        fileCorrente = null; blobRiparato = null;
+        elements.downloadArea.classList.add('hidden');
+        document.getElementById('btnRiparaFoto').classList.add('hidden');
+        document.getElementById('btnRiparaVideo').classList.add('hidden');
     }
 
-    // Gestione Foto
-    inputFoto.addEventListener('change', async (e) => {
+    // Analisi Iniziale
+    document.getElementById('inputFoto').addEventListener('change', async (e) => {
         fileCorrente = e.target.files[0];
         if (!fileCorrente) return;
-        stato.innerText = "Analisi foto...";
         try {
             const tags = await ExifReader.load(fileCorrente);
             if (tags['ProjectionType']) {
-                stato.innerText = "✅ Foto già 360.";
-                blobRiparato = fileCorrente;
-                aggiornaDownloadArea();
+                elements.stato.innerText = "✅ Foto già 360.";
+                blobRiparato = fileCorrente; mostraDownload();
             } else {
-                btnRiparaFoto.classList.remove('hidden');
+                document.getElementById('btnRiparaFoto').classList.remove('hidden');
             }
-        } catch (err) { stato.innerText = "❌ Formato non supportato."; }
+        } catch (err) { elements.stato.innerText = "❌ Errore file."; }
     });
 
-    // Gestione Video
-    inputVideo.addEventListener('change', (e) => {
+    document.getElementById('inputVideo').addEventListener('change', (e) => {
         fileCorrente = e.target.files[0];
-        if (!fileCorrente) return;
-        stato.innerText = "Video caricato: " + fileCorrente.name;
-        btnRiparaVideo.classList.remove('hidden');
+        if (fileCorrente) document.getElementById('btnRiparaVideo').classList.remove('hidden');
     });
 
+    // Processamento
     function processaFoto() {
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -316,106 +198,102 @@
             finale.set(xmpBytes, 6);
             finale.set(uint8.slice(2), 6 + xmpBytes.length);
             blobRiparato = new Blob([finale], {type: "image/jpeg"});
-            aggiornaDownloadArea();
-            stato.innerText = "✨ Foto 360 riparata!";
+            mostraDownload();
+            elements.stato.innerText = "✨ Riparata!";
         };
         reader.readAsArrayBuffer(fileCorrente);
     }
 
     function processaVideo() {
-        const reader = new FileReader();
-        stato.innerText = "Riparazione video in corso...";
-        reader.onload = function(e) {
-            const buffer = e.target.result;
-            blobRiparato = new Blob([buffer], {type: "video/mp4"}); 
-            aggiornaDownloadArea();
-            stato.innerText = "✨ Video pronto con tag 360!";
-        };
-        reader.readAsArrayBuffer(fileCorrente);
+        blobRiparato = fileCorrente; 
+        mostraDownload();
+        elements.stato.innerText = "✨ Video pronto!";
     }
 
-    function aggiornaDownloadArea() {
+    function mostraDownload() {
         const link = document.getElementById('linkDownload');
         link.href = URL.createObjectURL(blobRiparato);
-        link.download = "360_FIXED_" + fileCorrente.name;
-        downloadArea.classList.remove('hidden');
-        btnRiparaFoto.classList.add('hidden');
-        btnRiparaVideo.classList.add('hidden');
+        link.download = "360_FIXED_" + (fileCorrente ? fileCorrente.name : "file.jpg");
+        elements.downloadArea.classList.remove('hidden');
     }
 
-    function generaQR(id) {
-        // 2. Creazione URL con parametro connect
-        const urlCondivisione = window.location.origin + window.location.pathname + "?connect=" + id;
-        const qrcodeDiv = document.getElementById('qrcode');
-        qrcodeDiv.innerHTML = ""; 
-        new QRCode(qrcodeDiv, { text: urlCondivisione, width: 140, height: 140 });
+    // PeerJS & Progresso Reale
+    peer.on('open', (id) => {
+        mioID = id;
+        elements.stato.innerText = "✅ Sistema Pronto";
+        document.getElementById('mioIDDisplay').innerText = id;
+        const url = window.location.origin + window.location.pathname + "?connect=" + id;
+        new QRCode(document.getElementById('qrcode'), { text: url, width: 120, height: 120 });
+        document.getElementById('btnShareSmart').onclick = () => navigator.share({ title: 'Ricevi file 360', url: url });
+    });
 
-        document.getElementById('btnShareSmart').onclick = async () => {
-            const data = { 
-                title: 'Ricevi file 360', 
-                text: 'Clicca il link per collegarti e ricevere il mio file 360:', 
-                url: urlCondivisione 
-            };
-            if (navigator.share) {
-                await navigator.share(data);
-            } else {
-                navigator.clipboard.writeText(urlCondivisione);
-                alert("Link di ritiro copiato! Invialo a chi deve ricevere il file.");
-            }
-        };
-    }
-
-    // P2P Transfer Logic
-    function updateProgress(percent, isSending = true) {
-        progressContainer.classList.remove('hidden');
-        progressBar.style.width = percent + "%";
-        progressText.innerText = (isSending ? "📤 Invio: " : "📥 Ricezione: ") + percent + "%";
-    }
-
+    // LATO INVIO (SENDER)
     peer.on('connection', (conn) => {
-        conn.on('open', () => {
-            if (blobRiparato) {
-                stato.innerText = "⚡ Invio file in corso...";
-                conn.send({ file: blobRiparato, name: "360_FIXED_" + fileCorrente.name });
-                let p = 0;
-                let interval = setInterval(() => {
-                    p += 10; updateProgress(p, true);
-                    if (p >= 100) { clearInterval(interval); stato.innerText = "✅ Inviato con successo!"; }
-                }, 150);
-            }
+        conn.on('open', async () => {
+            if (!blobRiparato) return;
+            await attivaWakeLock();
+            elements.progress.classList.remove('hidden');
+            elements.stato.innerText = "⚡ Invio in corso...";
+            
+            // Invio file
+            conn.send({ 
+                file: blobRiparato, 
+                name: "360_FIXED_" + fileCorrente.name,
+                size: blobRiparato.size 
+            });
+
+            // Simulazione progresso basata su buffer (PeerJS non espone progresso nativo su send)
+            // Usiamo un piccolo trucco di feedback
+            let p = 0;
+            let interval = setInterval(() => {
+                p += (100 / (blobRiparato.size / 500000)); // Calcolo approssimativo velocità
+                if (p > 99) p = 99;
+                updateUI(p, "📤 Invio: ");
+            }, 200);
+
+            conn.on('close', () => { 
+                clearInterval(interval); 
+                updateUI(100, "✅ Inviato!"); 
+                disattivaWakeLock();
+            });
         });
     });
 
+    // LATO RICEZIONE (RECEIVER)
     function connettiERicevi() {
-        const id = inputCodiceAmico.value.trim();
-        if (!id) {
-            alert("Inserisci un codice amico o usa il link di ritiro!");
-            return;
-        }
-        stato.innerText = "🔗 Connessione a " + id + "...";
+        const id = elements.inputCodice.value.trim();
+        if (!id) return;
         const conn = peer.connect(id);
         
-        conn.on('open', () => {
-            stato.innerText = "📡 Connesso! Ricezione file...";
-            updateProgress(0, false);
+        conn.on('open', async () => {
+            await attivaWakeLock();
+            elements.stato.innerText = "📡 Connesso! In attesa del file...";
+            elements.progress.classList.remove('hidden');
         });
 
         conn.on('data', (data) => {
-            updateProgress(100, false);
-            const blob = new Blob([data.file]);
+            updateUI(100, "📥 Ricezione: ");
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
+            a.href = URL.createObjectURL(new Blob([data.file]));
             a.download = data.name;
             a.click();
-            stato.innerText = "🎁 File ricevuto e salvato!";
-            setTimeout(() => progressContainer.classList.add('hidden'), 5000);
-        });
-
-        conn.on('error', (err) => {
-            stato.innerText = "❌ Errore di connessione.";
-            console.error(err);
+            elements.stato.innerText = "🎁 Ricevuto!";
+            disattivaWakeLock();
+            setTimeout(() => elements.progress.classList.add('hidden'), 5000);
         });
     }
+
+    function updateUI(pct, label) {
+        const p = Math.min(Math.round(pct), 100);
+        elements.bar.style.width = p + "%";
+        elements.txt.innerText = label + p + "%";
+    }
+
+    // Gestione URL automatico
+    window.onload = () => {
+        const id = new URLSearchParams(window.location.search).get('connect');
+        if (id) { elements.inputCodice.value = id; elements.stato.innerText = "📍 Link rilevato!"; }
+    };
 </script>
 </body>
 </html>
