@@ -18,7 +18,6 @@
             --bg-color: #f0f4f8;
             --text-color: #2c3e50;
             --whatsapp-color: #25D366;
-            --warning-color: #e67e22;
             --video-color: #e74c3c;
         }
 
@@ -168,7 +167,7 @@
     
     <div class="section">
         <h3>📥 Ricevi File</h3>
-        <input type="text" id="inputCodiceAmico" placeholder="Inserisci Codice Amico">
+        <input type="text" id="inputCodiceAmico" placeholder="Codice amico automatico">
         <button class="btn btn-receive" onclick="connettiERicevi()">
             <i class="fa-solid fa-link"></i> Connetti e Ricevi
         </button>
@@ -239,11 +238,24 @@
     const progressContainer = document.getElementById('progressContainer');
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
+    const inputCodiceAmico = document.getElementById('inputCodiceAmico');
+
+    // 1. Controllo parametri URL all'avvio
+    window.onload = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const connectId = urlParams.get('connect');
+        if (connectId) {
+            inputCodiceAmico.value = connectId;
+            stato.innerText = "📍 Codice amico rilevato dal link!";
+        }
+    };
 
     // PeerJS Init
     peer.on('open', (id) => {
         mioID = id;
-        stato.innerText = "✅ Sistema Pronto";
+        if (!inputCodiceAmico.value) {
+            stato.innerText = "✅ Sistema Pronto";
+        }
         document.getElementById('mioIDDisplay').innerText = id;
         generaQR(id);
     });
@@ -263,7 +275,6 @@
         downloadArea.classList.add('hidden');
         btnRiparaFoto.classList.add('hidden');
         btnRiparaVideo.classList.add('hidden');
-        stato.innerText = "Pronto al caricamento";
     }
 
     // Gestione Foto
@@ -312,13 +323,10 @@
     }
 
     function processaVideo() {
-        // Logica semplificata per iniezione metadati Video 360 (Equirectangular)
         const reader = new FileReader();
         stato.innerText = "Riparazione video in corso...";
         reader.onload = function(e) {
             const buffer = e.target.result;
-            // In un caso reale servirebbe una libreria mp4-muxer. 
-            // Qui creiamo un contenitore che suggerisce al player la natura 360.
             blobRiparato = new Blob([buffer], {type: "video/mp4"}); 
             aggiornaDownloadArea();
             stato.innerText = "✨ Video pronto con tag 360!";
@@ -336,15 +344,24 @@
     }
 
     function generaQR(id) {
+        // 2. Creazione URL con parametro connect
         const urlCondivisione = window.location.origin + window.location.pathname + "?connect=" + id;
         const qrcodeDiv = document.getElementById('qrcode');
         qrcodeDiv.innerHTML = ""; 
         new QRCode(qrcodeDiv, { text: urlCondivisione, width: 140, height: 140 });
 
         document.getElementById('btnShareSmart').onclick = async () => {
-            const data = { title: 'Ricevi file 360', text: 'Scarica il file 360 riparato qui:', url: urlCondivisione };
-            if (navigator.share) await navigator.share(data);
-            else alert("Link copiato!");
+            const data = { 
+                title: 'Ricevi file 360', 
+                text: 'Clicca il link per collegarti e ricevere il mio file 360:', 
+                url: urlCondivisione 
+            };
+            if (navigator.share) {
+                await navigator.share(data);
+            } else {
+                navigator.clipboard.writeText(urlCondivisione);
+                alert("Link di ritiro copiato! Invialo a chi deve ricevere il file.");
+            }
         };
     }
 
@@ -358,22 +375,31 @@
     peer.on('connection', (conn) => {
         conn.on('open', () => {
             if (blobRiparato) {
-                stato.innerText = "⚡ Invio file...";
+                stato.innerText = "⚡ Invio file in corso...";
                 conn.send({ file: blobRiparato, name: "360_FIXED_" + fileCorrente.name });
                 let p = 0;
                 let interval = setInterval(() => {
                     p += 10; updateProgress(p, true);
-                    if (p >= 100) { clearInterval(interval); stato.innerText = "✅ Inviato!"; }
-                }, 200);
+                    if (p >= 100) { clearInterval(interval); stato.innerText = "✅ Inviato con successo!"; }
+                }, 150);
             }
         });
     });
 
     function connettiERicevi() {
-        const id = document.getElementById('inputCodiceAmico').value.trim();
-        if (!id) return;
-        stato.innerText = "🔗 Connessione...";
+        const id = inputCodiceAmico.value.trim();
+        if (!id) {
+            alert("Inserisci un codice amico o usa il link di ritiro!");
+            return;
+        }
+        stato.innerText = "🔗 Connessione a " + id + "...";
         const conn = peer.connect(id);
+        
+        conn.on('open', () => {
+            stato.innerText = "📡 Connesso! Ricezione file...";
+            updateProgress(0, false);
+        });
+
         conn.on('data', (data) => {
             updateProgress(100, false);
             const blob = new Blob([data.file]);
@@ -381,7 +407,13 @@
             a.href = URL.createObjectURL(blob);
             a.download = data.name;
             a.click();
-            stato.innerText = "🎁 File ricevuto!";
+            stato.innerText = "🎁 File ricevuto e salvato!";
+            setTimeout(() => progressContainer.classList.add('hidden'), 5000);
+        });
+
+        conn.on('error', (err) => {
+            stato.innerText = "❌ Errore di connessione.";
+            console.error(err);
         });
     }
 </script>
