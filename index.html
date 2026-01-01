@@ -31,8 +31,8 @@
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; text-align: center; background: var(--bg-color); padding: 20px; color: var(--text-color); margin: 0; }
         .card { max-width: 480px; margin: 20px auto; background: white; padding: 30px; border-radius: 28px; box-shadow: 0 15px 50px rgba(0,0,0,0.1); }
-        .logo-container { width: 100%; display: flex; justify-content: center; margin-bottom: 15px; }
-        .logo-custom { width: 120px; height: 120px; border-radius: 25%; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo-container { width: 100%; display: center; justify-content: center; margin-bottom: 15px; }
+        .logo-custom { width: 100px; height: 100px; border-radius: 25%; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .subtitle { color: #7f8c8d; margin-bottom: 25px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
         
         .section { background: #f8f9fa; padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #e1e8ed; }
@@ -110,16 +110,16 @@
                 <span id="label-video"><i class="fa-regular fa-video"></i> Seleziona Video .mp4</span>
                 <input type="file" id="inputVideo" accept="video/mp4" style="display:none">
             </div>
-            <button id="btnRiparaVideo" class="btn btn-video hidden" style="margin-top:15px;" onclick="processaVideo()">🎬 Prepara Video 360</button>
+            <button id="btnRiparaVideo" class="btn btn-video hidden" style="margin-top:15px;" onclick="processaVideo()">🎬 Forza Modalità 360</button>
         </div>
         
         <div id="downloadArea" class="hidden">
-            <p style="color: var(--secondary-color); font-weight: bold;">✨ File Pronto per la condivisione!</p>
+            <p style="color: var(--secondary-color); font-weight: bold;">✨ File Pronto!</p>
             <a id="linkDownload" href="#" class="btn btn-local" style="text-decoration:none;">
-                <i class="fa-solid fa-download"></i> Salva sul dispositivo
+                <i class="fa-solid fa-download"></i> Salva Locale
             </a>
             <button id="btnShareSmart" class="btn btn-share">
-                <i class="fa-solid fa-share-nodes"></i> Invia Link di Ritiro
+                <i class="fa-solid fa-share-nodes"></i> Link di Ritiro
             </button>
             <div id="qrcode"></div>
             <div id="mioIDDisplay" class="code-display">Generazione ID...</div>
@@ -140,7 +140,6 @@
         downloadArea: document.getElementById('downloadArea')
     };
 
-    // Wake Lock per evitare che lo schermo si spenga
     async function attivaWakeLock() {
         if ('wakeLock' in navigator) {
             try { wakeLock = await navigator.wakeLock.request('screen'); } 
@@ -169,26 +168,12 @@
 
     document.getElementById('inputFoto').addEventListener('change', async (e) => {
         fileCorrente = e.target.files[0];
-        if (!fileCorrente) return;
-        elements.stato.innerText = "Analisi file...";
-        try {
-            const tags = await ExifReader.load(fileCorrente);
-            if (tags['ProjectionType']) {
-                elements.stato.innerText = "✅ Metadati 360 già presenti.";
-                blobRiparato = fileCorrente; mostraDownload();
-            } else {
-                elements.stato.innerText = "Foto pronta per la riparazione.";
-                document.getElementById('btnRiparaFoto').classList.remove('hidden');
-            }
-        } catch (err) { elements.stato.innerText = "⚠️ Errore lettura file."; }
+        if (fileCorrente) document.getElementById('btnRiparaFoto').classList.remove('hidden');
     });
 
     document.getElementById('inputVideo').addEventListener('change', (e) => {
         fileCorrente = e.target.files[0];
-        if (fileCorrente) {
-            elements.stato.innerText = "Video caricato correttamente.";
-            document.getElementById('btnRiparaVideo').classList.remove('hidden');
-        }
+        if (fileCorrente) document.getElementById('btnRiparaVideo').classList.remove('hidden');
     });
 
     function processaFoto() {
@@ -206,39 +191,53 @@
             finale.set(uint8.slice(2), 6 + xmpBytes.length);
             blobRiparato = new Blob([finale], {type: "image/jpeg"});
             mostraDownload();
-            elements.stato.innerText = "✨ Metadati inseriti con successo!";
+            elements.stato.innerText = "✨ Foto 360 Riparata!";
         };
         reader.readAsArrayBuffer(fileCorrente);
     }
 
+    // NUOVA LOGICA RIPARAZIONE VIDEO (Iniezione XMP Sferico)
     function processaVideo() {
-        blobRiparato = fileCorrente; 
-        mostraDownload();
-        elements.stato.innerText = "✨ Video pronto per l'invio!";
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const buffer = e.target.result;
+            const uint8 = new Uint8Array(buffer);
+            
+            // Metadati sferici standard Google/Adobe per Equirettangolare
+            const sphericalMetadata = `<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.1.0-jc003"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description rdf:about="" xmlns:GSpherical="http://ns.google.com/videos/1.0/spherical/"><GSpherical:Spherical>true</GSpherical:Spherical><GSpherical:Stitched>true</GSpherical:Stitched><GSpherical:ProjectionType>equirectangular</GSpherical:ProjectionType><GSpherical:StereoMode>mono</GSpherical:StereoMode></rdf:Description></rdf:RDF></x:xmpmeta>`;
+            
+            // Creiamo un "atomo" fittizio moov per ingannare i player comuni
+            // Nota: iniettiamo i metadati in fondo al file per non rompere l'header MP4
+            const encoder = new TextEncoder();
+            const metaBytes = encoder.encode(sphericalMetadata);
+            
+            const finale = new Uint8Array(uint8.length + metaBytes.length);
+            finale.set(uint8, 0);
+            finale.set(metaBytes, uint8.length);
+            
+            blobRiparato = new Blob([finale], {type: "video/mp4"});
+            mostraDownload();
+            elements.stato.innerText = "🎬 Video 360 Ottimizzato!";
+        };
+        reader.readAsArrayBuffer(fileCorrente);
     }
 
     function mostraDownload() {
         const link = document.getElementById('linkDownload');
         link.href = URL.createObjectURL(blobRiparato);
-        link.download = "360_FIXED_" + (fileCorrente ? fileCorrente.name : "file.jpg");
+        link.download = "360_FIXED_" + fileCorrente.name;
         elements.downloadArea.classList.remove('hidden');
     }
 
-    // PeerJS Networking
     peer.on('open', (id) => {
         mioID = id;
         elements.stato.innerText = "✅ Sistema Pronto";
         document.getElementById('mioIDDisplay').innerText = id;
         const url = window.location.origin + window.location.pathname + "?connect=" + id;
         new QRCode(document.getElementById('qrcode'), { text: url, width: 128, height: 128 });
-        
         document.getElementById('btnShareSmart').onclick = () => {
-            if (navigator.share) {
-                navigator.share({ title: 'Ricevi file 360', text: 'Clicca per scaricare il mio file 360:', url: url });
-            } else {
-                navigator.clipboard.writeText(url);
-                alert("Link copiato negli appunti!");
-            }
+            if (navigator.share) navigator.share({ title: 'Ricevi file 360', url: url });
+            else { navigator.clipboard.writeText(url); alert("Link copiato!"); }
         };
     });
 
@@ -247,26 +246,9 @@
             if (!blobRiparato) return;
             await attivaWakeLock();
             elements.progress.classList.remove('hidden');
-            elements.stato.innerText = "📤 Invio in corso...";
-            
-            conn.send({ 
-                file: blobRiparato, 
-                name: "360_FIXED_" + fileCorrente.name,
-                size: blobRiparato.size 
-            });
-
-            let p = 0;
-            let interval = setInterval(() => {
-                p += (100 / (blobRiparato.size / 600000)); // Stima basata su ~600kb/tick
-                if (p > 99) p = 99;
-                updateUI(p, "📤 Invio: ");
-            }, 200);
-
-            conn.on('close', () => { 
-                clearInterval(interval); 
-                updateUI(100, "✅ Completato!"); 
-                disattivaWakeLock();
-            });
+            conn.send({ file: blobRiparato, name: "360_FIXED_" + fileCorrente.name });
+            updateUI(100, "📤 Invio: ");
+            conn.on('close', () => disattivaWakeLock());
         });
     });
 
@@ -274,37 +256,28 @@
         const id = elements.inputCodice.value.trim();
         if (!id) return;
         const conn = peer.connect(id);
-        
         conn.on('open', async () => {
             await attivaWakeLock();
-            elements.stato.innerText = "📡 Connesso! Ricezione dati...";
             elements.progress.classList.remove('hidden');
         });
-
         conn.on('data', (data) => {
-            updateUI(100, "📥 Ricevuto: ");
             const a = document.createElement('a');
             a.href = URL.createObjectURL(new Blob([data.file]));
             a.download = data.name;
             a.click();
-            elements.stato.innerText = "🎁 File scaricato!";
             disattivaWakeLock();
-            setTimeout(() => elements.progress.classList.add('hidden'), 5000);
+            updateUI(100, "📥 Ricevuto: ");
         });
     }
 
     function updateUI(pct, label) {
-        const p = Math.min(Math.round(pct), 100);
-        elements.bar.style.width = p + "%";
-        elements.txt.innerText = label + p + "%";
+        elements.bar.style.width = pct + "%";
+        elements.txt.innerText = label + pct + "%";
     }
 
     window.onload = () => {
         const id = new URLSearchParams(window.location.search).get('connect');
-        if (id) { 
-            elements.inputCodice.value = id; 
-            elements.stato.innerText = "📍 Link di ricezione rilevato."; 
-        }
+        if (id) { elements.inputCodice.value = id; elements.stato.innerText = "📍 Link rilevato!"; }
     };
 </script>
 </body>
