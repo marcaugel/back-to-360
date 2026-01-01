@@ -30,10 +30,20 @@
         }
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; text-align: center; background: var(--bg-color); padding: 20px; color: var(--text-color); margin: 0; }
+        
+        /* Restyling Logo: Grande, senza bordi e integrato */
+        .header-main { margin-bottom: 30px; }
+        .logo-custom { 
+            width: 160px; /* Più grande */
+            height: auto; 
+            border-radius: 0; /* Rimosso arrotondamento forzato */
+            object-fit: contain; 
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.08)); /* Ombra leggera sul contenuto, non sul box */
+            margin-bottom: 10px;
+        }
+        
         .card { max-width: 480px; margin: 20px auto; background: white; padding: 30px; border-radius: 28px; box-shadow: 0 15px 50px rgba(0,0,0,0.1); }
-        .logo-container { width: 100%; display: center; justify-content: center; margin-bottom: 15px; }
-        .logo-custom { width: 100px; height: 100px; border-radius: 25%; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .subtitle { color: #7f8c8d; margin-bottom: 25px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .subtitle { color: #7f8c8d; margin-bottom: 25px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
         
         .section { background: #f8f9fa; padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #e1e8ed; }
 
@@ -57,7 +67,7 @@
         
         #qrcode { background: white; padding: 10px; display: inline-block; margin-top: 15px; border-radius: 12px; border: 1px solid #eee; }
         .code-display { font-size: 18px; font-family: monospace; font-weight: bold; background: #eef6ff; padding: 12px; border-radius: 10px; color: var(--primary-color); border: 1px dashed var(--primary-color); margin-top: 10px; }
-        input[type="text"] { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 12px; text-align: center; font-size: 16px; }
+        input[type="text"] { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 12px; text-align: center; font-size: 16px; box-sizing: border-box; }
         .hidden { display: none; }
         .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
         .tab-btn { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ddd; cursor: pointer; background: white; font-weight: bold; }
@@ -67,10 +77,10 @@
 <body>
 
 <div class="card">
-    <div class="logo-container">
-        <img src="icon.png" id="mainLogo" alt="Back to 360" class="logo-custom" onerror="this.src='https://via.placeholder.com/150/3498db/ffffff?text=360'">
+    <div class="header-main">
+        <img src="icon.png" id="mainLogo" alt="Back to 360" class="logo-custom" onerror="this.src='https://via.placeholder.com/200/3498db/ffffff?text=360+FIX'">
+        <p class="subtitle">Metadata Fixer & P2P Share</p>
     </div>
-    <p class="subtitle">Metadata Fixer & P2P Share</p>
     
     <div class="section">
         <h3>📥 Ricevi File</h3>
@@ -153,7 +163,7 @@
 
     function switchTab(type) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
+        if (event) event.target.classList.add('active');
         document.getElementById('image-upload').classList.toggle('hidden', type !== 'image');
         document.getElementById('video-upload').classList.toggle('hidden', type !== 'video');
         resetUpload();
@@ -196,25 +206,17 @@
         reader.readAsArrayBuffer(fileCorrente);
     }
 
-    // NUOVA LOGICA RIPARAZIONE VIDEO (Iniezione XMP Sferico)
     function processaVideo() {
         const reader = new FileReader();
         reader.onload = function(e) {
             const buffer = e.target.result;
             const uint8 = new Uint8Array(buffer);
-            
-            // Metadati sferici standard Google/Adobe per Equirettangolare
             const sphericalMetadata = `<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.1.0-jc003"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description rdf:about="" xmlns:GSpherical="http://ns.google.com/videos/1.0/spherical/"><GSpherical:Spherical>true</GSpherical:Spherical><GSpherical:Stitched>true</GSpherical:Stitched><GSpherical:ProjectionType>equirectangular</GSpherical:ProjectionType><GSpherical:StereoMode>mono</GSpherical:StereoMode></rdf:Description></rdf:RDF></x:xmpmeta>`;
-            
-            // Creiamo un "atomo" fittizio moov per ingannare i player comuni
-            // Nota: iniettiamo i metadati in fondo al file per non rompere l'header MP4
             const encoder = new TextEncoder();
             const metaBytes = encoder.encode(sphericalMetadata);
-            
             const finale = new Uint8Array(uint8.length + metaBytes.length);
             finale.set(uint8, 0);
             finale.set(metaBytes, uint8.length);
-            
             blobRiparato = new Blob([finale], {type: "video/mp4"});
             mostraDownload();
             elements.stato.innerText = "🎬 Video 360 Ottimizzato!";
